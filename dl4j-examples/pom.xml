@@ -12,6 +12,9 @@
     </parent>
 
     <name>DeepLearning4j Examples</name>
+    <properties>
+        <nd4j.backend>nd4j-cuda-8.0-platform</nd4j.backend>
+    </properties>
 
     <repositories>
         <repository>
