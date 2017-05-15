@@ -48,6 +48,7 @@ import java.util.Random
 import collection.JavaConversions._
 import org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2YCrCb
 import org.deeplearning4j.examples.convolution.AnimalsClassification
+import org.deeplearning4j.examples.deeplogo.AnimalsClassificationS.recordReader
 
 /**
  * Created by paolo on 15/05/2017.
@@ -68,7 +69,7 @@ object AnimalsClassificationS extends App{
   protected var splitTrainTest = 0.8
   protected var nCores = 2
   protected var save = false
-  protected var modelType = "AlexNet" // LeNet, AlexNet or Custom but you need to fill it out
+  protected var modelType = "LeNet" // LeNet, AlexNet or Custom but you need to fill it out
   private def convInit(name: String, in: Int, out: Int, kernel: Array[Int], stride: Array[Int], pad: Array[Int], bias: Double): ConvolutionLayer = return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).biasInit(bias).build
 
   private def conv3x3(name: String, out: Int, bias: Double): ConvolutionLayer = {
@@ -146,7 +147,6 @@ object AnimalsClassificationS extends App{
 
 
 
-
   //-------------------------------MAIN--------------------
   log.info("Load data....")
   /** cd
@@ -163,7 +163,8 @@ object AnimalsClassificationS extends App{
     * Data Setup -> train test split
     *  - inputSplit = define train and test split
     **/
-  val inputSplit = fileSplit.sample(pathFilter, numExamples * (1 + splitTrainTest), numExamples * (1 - splitTrainTest))
+  val inputSplit: Array[InputSplit] = fileSplit.sample(pathFilter, numExamples * (splitTrainTest), numExamples * (1 - splitTrainTest))
+  val fullData = fileSplit.sample(pathFilter,1)(0)
   val trainData = inputSplit(0)
   val testData = inputSplit(1)
   /**
@@ -213,13 +214,16 @@ object AnimalsClassificationS extends App{
   // Train without transformations
   recordReader.initialize(trainData, null)
   var dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
-  scaler.fit(dataIter)
+  val fullDataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
+  scaler.fit(fullDataIter)
+  //scaler.fit(dataIter)
   dataIter.setPreProcessor(scaler)
   var trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
   network.fit(trainIter)
   // Train with transformations
   import scala.collection.JavaConversions._
 
+  /*
   for (transform <- transforms) {
     System.out.print("\nTraining on transformation: " + transform.getClass.toString + "\n\n")
     recordReader.initialize(trainData, transform)
@@ -229,12 +233,24 @@ object AnimalsClassificationS extends App{
     trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
     network.fit(trainIter)
   }
+
+  transforms.foreach( trans => {
+    System.out.print("\nTraining on transformation: " + trans.getClass.toString + "\n\n")
+    recordReader.initialize(trainData, trans)
+    dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
+    scaler.fit(dataIter)
+    dataIter.setPreProcessor(scaler)
+    trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
+    network.fit(trainIter)
+  })
+*/
+
   log.info("Evaluate model....")
   recordReader.initialize(testData)
-  dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
-  scaler.fit(dataIter)
-  dataIter.setPreProcessor(scaler)
-  val eval = network.evaluate(dataIter)
+  val dataIterToEval = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
+  //scaler.fit(dataIter)
+  dataIterToEval.setPreProcessor(scaler)
+  val eval = network.evaluate(dataIterToEval)
   log.info(eval.stats(true))
   // Example on how to get predict results with trained model
   dataIter.reset()
