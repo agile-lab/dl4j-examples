@@ -59,7 +59,7 @@
                 <artifactId>nd4j-cuda-8.0-platform</artifactId>
                 <version>${nd4j.version}</version>
             </dependency>
-       </dependencies>
+        </dependencies>
     </dependencyManagement>
 
     <dependencies>
@@ -123,10 +123,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>2.11.0</version>
-        </dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.11.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -141,8 +141,6 @@
                             <goal>exec</goal>
                         </goals>
                     </execution>
-                    <!-- Add src/main/scala to source path of Eclipse -->
-                    
                 </executions>
                 <configuration>
                     <executable>java</executable>
@@ -176,11 +174,14 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>reference.conf</resource>
                                 </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -198,32 +199,27 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>2.15.2</version>
-                <executions>
-                    <!-- Run scala compiler in the process-resources phase, so that dependencies on
-                         scala classes can be resolved later in the (Java) compile phase -->
-                    <execution>
-                        <id>scala-compile-first</id>
-                        <phase>process-resources</phase>                        
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        </execution>
- 
-                        <!-- Run scala compiler in the process-test-resources phase, so that dependencies on
-                             scala classes can be resolved later in the (Java) test-compile phase -->                    
-                        <execution>
-                        <id>scala-test-compile</id>
-                        <phase>process-test-resources</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <plugin>       
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <version>2.15.2</version>
+                <executions>          
+                    <execution>              
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>
+                        <goals>                      
+                            <goal>compile</goal>  
+                        </goals>      
+                    </execution>          
+                    <execution>            
+                        <id>scala-test-compile</id>
+                        <phase>process-test-resources</phase>
+                        <goals>        
+                            <goal>testCompile</goal>
+                        </goals>          
+                    </execution> 
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
