@@ -86,7 +86,7 @@ public class BasicHyperparameterOptimizationExample {
 
         //Now: We need to define a few configuration options
         // (a) How are we going to generate candidates? (random search or grid search)
-        CandidateGenerator<DL4JConfiguration> candidateGenerator = new RandomSearchGenerator<>(hyperparameterSpace);    //Alternatively: new GridSearchCandidateGenerator<>(hyperparameterSpace, 5, GridSearchCandidateGenerator.Mode.RandomOrder);
+        CandidateGenerator<DL4JConfiguration> candidateGenerator = new RandomSearchGenerator<DL4JConfiguration>(hyperparameterSpace);    //Alternatively: new GridSearchCandidateGenerator<>(hyperparameterSpace, 5, GridSearchCandidateGenerator.Mode.RandomOrder);
 
         // (b) How are going to provide data? For now, we'll use a simple built-in data provider for DataSetIterators
         int nTrainEpochs = 2;
