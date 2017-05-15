@@ -156,7 +156,7 @@ object AnimalsClassificationS extends App{
     *  - pathFilter = define additional file load filter to limit size and balance batch content
     * */
   val labelMaker = new ParentPathLabelGenerator
-  val mainPath = new File(System.getProperty("user.dir"), "dl4j-examples/src/main/resources/animals/")
+  val mainPath = new File(System.getProperty("user.dir"), "src/main/resources/animals/")
   val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, rng)
   val pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, batchSize)
   /**
