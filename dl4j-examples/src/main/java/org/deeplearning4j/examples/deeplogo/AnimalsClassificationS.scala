@@ -2,15 +2,13 @@ package org.deeplearning4j.examples.deeplogo;
 
 import org.apache.commons.io.FilenameUtils
 import org.deeplearning4j.optimize.api.IterationListener
-import org.datavec.api.io.filters.BalancedPathFilter
+import org.datavec.api.io.filters.{BalancedPathFilter, RandomPathFilter}
 import org.datavec.api.io.labels.ParentPathLabelGenerator
 import org.datavec.api.split.FileSplit
 import org.datavec.api.split.InputSplit
 import org.datavec.image.loader.NativeImageLoader
 import org.datavec.image.recordreader.ImageRecordReader
-import org.datavec.image.transform.FlipImageTransform
-import org.datavec.image.transform.ImageTransform
-import org.datavec.image.transform.WarpImageTransform
+import org.datavec.image.transform.{ColorConversionTransform, FlipImageTransform, ImageTransform, WarpImageTransform}
 import org.deeplearning4j.api.storage.StatsStorage
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator
@@ -47,6 +45,7 @@ import java.util.Random
 
 import collection.JavaConversions._
 import org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2YCrCb
+import org.datavec.api.conf.Configuration
 import org.deeplearning4j.examples.convolution.AnimalsClassification
 import org.deeplearning4j.examples.deeplogo.AnimalsClassificationS.recordReader
 
@@ -55,21 +54,22 @@ import org.deeplearning4j.examples.deeplogo.AnimalsClassificationS.recordReader
  */
 object AnimalsClassificationS extends App{
   protected val log = LoggerFactory.getLogger(classOf[AnimalsClassification])
-  protected var height = 100
-  protected var width = 100
+  protected var height = 500
+  protected var width = 500
   protected var channels = 3
-  protected var numExamples = 80
-  protected var numLabels = 4
+  protected var numExamples = 8240
+  protected var numLabels = 33
   protected var batchSize = 20
+  protected var maxPathPerLabels = 70
   protected var seed = 42
   protected var rng = new Random(seed)
-  protected var listenerFreq = 1
+  protected var listenerFreq = 10
   protected var iterations = 1
-  protected var epochs = 20
+  protected var epochs = 100
   protected var splitTrainTest = 0.8
-  protected var nCores = 2
+  protected var nCores = 4
   protected var save = false
-  protected var modelType = "LeNet" // LeNet, AlexNet or Custom but you need to fill it out
+  protected var modelType = "custom" // LeNet, AlexNet or Custom but you need to fill it out
   private def convInit(name: String, in: Int, out: Int, kernel: Array[Int], stride: Array[Int], pad: Array[Int], bias: Double): ConvolutionLayer = return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).biasInit(bias).build
 
   private def conv3x3(name: String, out: Int, bias: Double): ConvolutionLayer = {
@@ -94,16 +94,20 @@ object AnimalsClassificationS extends App{
       * Reference: https://gist.github.com/ramgo2/833f12e92359a2da9e5c2fb6333351c5
       **/
     val conf: MultiLayerConfiguration = new NeuralNetConfiguration.Builder().seed(seed).iterations(iterations)
-      .regularization(false).l2(0.005).activation(Activation.RELU).learningRate(0.0001)
+      .regularization(false).l2(0.005)
+      .activation(Activation.RELU)
+      .learningRate(0.0001)
       .weightInit(WeightInit.XAVIER).optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-      .updater(Updater.RMSPROP).momentum(0.9)
+      .updater(Updater.NESTEROVS).momentum(0.9)
       .list
       .layer(0, convInit("cnn1", channels, 50, Array[Int](5, 5), Array[Int](1, 1), Array[Int](0, 0), 0))
       .layer(1, maxPool("maxpool1", Array[Int](2, 2)))
       .layer(2, conv5x5("cnn2", 100, Array[Int](5, 5), Array[Int](1, 1), 0))
-      .layer(3, maxPool("maxool2", Array[Int](2, 2)))
+      .layer(3, maxPool("maxpool2", Array[Int](2, 2)))
       .layer(4, new DenseLayer.Builder().nOut(500).build)
-      .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nOut(numLabels).activation(Activation.SOFTMAX).build)
+      .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+          .nOut(numLabels)
+          .activation(Activation.SOFTMAX).build)
       .backprop(true).pretrain(false).setInputType(InputType.convolutional(height, width, channels)).build
     return new MultiLayerNetwork(conf)
   }
@@ -122,7 +126,8 @@ object AnimalsClassificationS extends App{
       .learningRateDecayPolicy(LearningRatePolicy.Step).lrPolicyDecayRate(0.1).lrPolicySteps(100000)
       .regularization(true).l2(5 * 1e-4).momentum(0.9).miniBatch(false)
       .list
-      .layer(0, convInit("cnn1", channels, 96, Array[Int](11, 11), Array[Int](4, 4), Array[Int](3, 3), 0)).layer(1, new LocalResponseNormalization.Builder().name("lrn1").build)
+      .layer(0, convInit("cnn1", channels, 96, Array[Int](11, 11), Array[Int](4, 4), Array[Int](3, 3), 0))
+      .layer(1, new LocalResponseNormalization.Builder().name("lrn1").build)
       .layer(2, maxPool("maxpool1", Array[Int](3, 3)))
       .layer(3, conv5x5("cnn2", 256, Array[Int](1, 1), Array[Int](2, 2), nonZeroBias))
       .layer(4, new LocalResponseNormalization.Builder().name("lrn2").build)
@@ -139,10 +144,39 @@ object AnimalsClassificationS extends App{
   }
 
   def customModel: MultiLayerNetwork = {
-    /**
-      * Use this method to build your own custom model.
-      **/
-    return null
+
+    val nonZeroBias: Double = 1
+    val dropOut: Double = 0.5
+    val conf: MultiLayerConfiguration = new NeuralNetConfiguration.Builder().seed(seed)
+      .weightInit(WeightInit.DISTRIBUTION)
+      .dist(new NormalDistribution(0.0, 0.01))
+      .activation(Activation.RELU)
+      .updater(Updater.NESTEROVS)
+      .iterations(iterations)
+      .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+      .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).learningRate(0.005).biasLearningRate(0.005 * 2)
+      .learningRateDecayPolicy(LearningRatePolicy.Step).lrPolicyDecayRate(0.1).lrPolicySteps(100000)
+      .regularization(true).l2(2 * 1e-4).momentum(0.9).miniBatch(false)
+      .list
+      .layer(0, new ConvolutionLayer.Builder(Array[Int](7, 7), Array[Int](1, 1), Array[Int](3, 3)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
+      .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
+      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(128).biasInit(0).activation(Activation.RELU).build)
+      .layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool1").build )
+      .layer(4, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(64).biasInit(nonZeroBias).build)
+      .layer(5, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
+      .layer(6, new DenseLayer.Builder().name("ffn1").nOut(64).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
+      .layer(7, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
+//      .layer(0, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
+//            .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
+//            .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(64).biasInit(0).activation(Activation.RELU).build)
+//            .layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool1").build )
+//            .layer(4, new DenseLayer.Builder().name("ffn1").nOut(64).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
+//            .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
+      .backprop(true)
+      .pretrain(false)
+      .setInputType(InputType.convolutional(height, width, channels))
+      .build
+    return new MultiLayerNetwork(conf)
   }
 
 
@@ -156,9 +190,12 @@ object AnimalsClassificationS extends App{
     *  - pathFilter = define additional file load filter to limit size and balance batch content
     * */
   val labelMaker = new ParentPathLabelGenerator
-  val mainPath = new File(System.getProperty("user.dir"), "src/main/resources/animals/")
+  val mainPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg/")
+  //val mainPath = new File(System.getProperty("user.dir"), "../../data/FlickrLogos-32_dataset_v2/FlickrLogos-v2/classes/jpg/")
   val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, rng)
-  val pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, batchSize)
+  //val pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, batchSize)
+
+  val pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, maxPathPerLabels)
   /**
     * Data Setup -> train test split
     *  - inputSplit = define train and test split
@@ -174,8 +211,8 @@ object AnimalsClassificationS extends App{
   val flipTransform1 = new FlipImageTransform(rng)
   val flipTransform2 = new FlipImageTransform(new Random(123))
   val warpTransform = new WarpImageTransform(rng, 42)
-  //        ImageTransform colorTransform = new ColorConversionTransform(new Random(seed), COLOR_BGR2YCrCb);
-  val transforms = Seq(flipTransform1, warpTransform, flipTransform2)
+  val colorTransform = new ColorConversionTransform(new Random(seed), COLOR_BGR2YCrCb);
+  val transforms = Seq(flipTransform1, warpTransform, colorTransform)
   /**
     * Data Setup -> normalization
     *  - how to normalize images and generate large dataset to train on
@@ -208,32 +245,20 @@ object AnimalsClassificationS extends App{
     *  - dataIter = a generator that only loads one batch at a time into memory to save memory
     *  - trainIter = uses MultipleEpochsIterator to ensure model runs through the data for all epochs
     **/
-  val recordReader = new ImageRecordReader(height, width, channels, labelMaker)
+  val recordReader = new MyImageRecordReader(height, width, channels, labelMaker)
+
 
   log.info("Train model....")
   // Train without transformations
-  recordReader.initialize(trainData, null)
+  recordReader.initialize(trainData)
   var dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
-  val fullDataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
-  scaler.fit(fullDataIter)
-  //scaler.fit(dataIter)
+  scaler.fit(dataIter)
   dataIter.setPreProcessor(scaler)
   var trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
   network.fit(trainIter)
   // Train with transformations
-  import scala.collection.JavaConversions._
 
-  /*
-  for (transform <- transforms) {
-    System.out.print("\nTraining on transformation: " + transform.getClass.toString + "\n\n")
-    recordReader.initialize(trainData, transform)
-    dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
-    scaler.fit(dataIter)
-    dataIter.setPreProcessor(scaler)
-    trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
-    network.fit(trainIter)
-  }
-
+/*
   transforms.foreach( trans => {
     System.out.print("\nTraining on transformation: " + trans.getClass.toString + "\n\n")
     recordReader.initialize(trainData, trans)
