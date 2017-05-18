@@ -1,6 +1,6 @@
 package net
 
-import deeplogo.LogoClassificationS._
+//import deeplogo.LogoClassificationS._
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf.{MultiLayerConfiguration, NeuralNetConfiguration, Updater}
 import org.deeplearning4j.nn.conf.inputs.InputType

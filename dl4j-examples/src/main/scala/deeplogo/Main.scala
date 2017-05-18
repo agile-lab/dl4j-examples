@@ -11,7 +11,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork
   */
 object Main extends App{
 
-  val network: MultiLayerNetwork = new CustomNet().createNet()
+  /*val network: MultiLayerNetwork = new CustomNet().createNet()
 
   val baseFolder = "d:\\Users\\andlatel\\Desktop\\jpg\\"
 
@@ -25,7 +25,7 @@ object Main extends App{
     val newImage = resizeImage(image, 320, 240)
 
     ImageIO.write(newImage, "png", new File("D:\\resize.jpg"))
-  }
+  }*/
 
   import java.awt.image.BufferedImage
   import org.imgscalr.Scalr

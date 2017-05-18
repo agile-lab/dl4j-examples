@@ -1,6 +1,6 @@
 package deeplogo
 
-import deeplogo.LogoClassificationS._
+//import deeplogo.LogoClassificationS._
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator
 import org.deeplearning4j.datasets.iterator.impl.CifarDataSetIterator
 import org.deeplearning4j.eval.Evaluation

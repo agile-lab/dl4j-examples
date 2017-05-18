@@ -1,5 +1,5 @@
 package net
-import deeplogo.LogoClassificationS._
+//import deeplogo.LogoClassificationS._
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf._
 import org.deeplearning4j.nn.conf.distribution.{GaussianDistribution, NormalDistribution}

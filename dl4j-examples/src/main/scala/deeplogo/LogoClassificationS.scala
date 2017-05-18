@@ -1,5 +1,8 @@
 package org.deeplearning4j.examples.deeplogo;
 
+import java.awt.Image
+import java.awt.image.BufferedImage
+
 import org.apache.commons.io.FilenameUtils
 import org.deeplearning4j.optimize.api.IterationListener
 import org.datavec.api.io.filters.{BalancedPathFilter, RandomPathFilter}
@@ -42,17 +45,18 @@ import java.util.ArrayList
 import java.util.Arrays
 import java.util.List
 import java.util.Random
+import javax.imageio.ImageIO
 
 import collection.JavaConversions._
 import org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2YCrCb
 import org.datavec.api.conf.Configuration
 import org.deeplearning4j.examples.convolution.AnimalsClassification
-import org.deeplearning4j.examples.deeplogo.AnimalsClassificationS.recordReader
+import org.nd4j.linalg.api.ndarray.INDArray
 
 /**
  * Created by paolo on 15/05/2017.
  */
-object AnimalsClassificationS extends App{
+object LogoClassification extends App{
   protected val log = LoggerFactory.getLogger(classOf[AnimalsClassification])
   protected var height = 500
   protected var width = 500
@@ -190,8 +194,10 @@ object AnimalsClassificationS extends App{
     *  - pathFilter = define additional file load filter to limit size and balance batch content
     * */
   val labelMaker = new ParentPathLabelGenerator
-  val mainPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg/")
+  //val mainPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg/")
+  //val mainPath = new File("d:\\Users\\andlatel\\Desktop\\jpg\\")
   //val mainPath = new File(System.getProperty("user.dir"), "../../data/FlickrLogos-32_dataset_v2/FlickrLogos-v2/classes/jpg/")
+  val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
   val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, rng)
   //val pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, batchSize)
 
@@ -251,7 +257,11 @@ object AnimalsClassificationS extends App{
   log.info("Train model....")
   // Train without transformations
   recordReader.initialize(trainData)
-  var dataIter = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
+  var dataIter: RecordReaderDataSetIterator = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
+
+  /*var dataIter2 = new RecordReaderDataSetIterator(recordReader, 1, 1, numLabels)
+  getImage(dataIter2)*/
+
   scaler.fit(dataIter)
   dataIter.setPreProcessor(scaler)
   var trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
@@ -294,14 +304,56 @@ object AnimalsClassificationS extends App{
 
 
 
+  def getImage(dataIter2: RecordReaderDataSetIterator) = {
+    while (dataIter2.hasNext) {
+      val ds = dataIter2.next
+      System.out.println(ds.getFeatures)
+      System.out.println(ds.getLabelName(0))
+
+      val res = toImage(ds.getFeatures)
+      writeImage(res)
+      try
+        Thread.sleep(3000) //1000 milliseconds is one second.
+      catch {
+        case ex: InterruptedException =>
+          Thread.currentThread.interrupt()
+      }
+    }
+  }
+
+  def toImage(matrix: INDArray): BufferedImage = {
+    import java.awt.image.BufferedImage
+    import java.awt.image.WritableRaster
+    import java.awt.Image._
+    val ratio = 4/3
+    val img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+    val a = 255
+    var p =0
 
 
+    System.out.println("iterator");
+    for(row <- 0 to height-1){
+      for(col <- 0 to width-1){
+        val r = matrix.getColumn(0).getColumn(row).getInt(col)
+        val g = matrix.getColumn(1).getColumn(row).getInt(col)
+        val b = matrix.getColumn(2).getColumn(row).getInt(col)
+        //set the pixel value
+        p = (a<<24) | (b<<16) | (g<<8) | r
+        img.setRGB(col, row, p)
+      }
+    }
 
+    //img.getScaledInstance(width, width/ratio, Image.SCALE_SMOOTH)
+    img
+  }
 
-
-
-
-
-
-
+  def writeImage(bi: BufferedImage) = {
+    try {
+      log.info("Write Image")
+      val outputfile = new File("D:\\saved.jpg");
+      ImageIO.write(bi, "png", outputfile);
+    } catch {
+      case e:Throwable => log.error("Error write image", e)
+    }
+  }
 }

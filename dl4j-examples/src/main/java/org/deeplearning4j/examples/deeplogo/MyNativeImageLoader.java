@@ -25,15 +25,24 @@ public class MyNativeImageLoader extends NativeImageLoader {
         int width = img.cols();
         int diff = Math.abs(width - height) / 2;
 
+        int top = 0;
+        int bottom = 0;
+        int left = 0;
+        int right = 0;
+
         if (width > height) {
-            x = diff;
-            width = width - 2*diff;
+            top = diff;
+            bottom = diff;
         } else if (height > width) {
-            y = diff;
-            height = height - 2*diff;
+            left = diff;
+            right = diff;
         }
 
-        return img.apply(new opencv_core.Rect(x, y, width, height));
+        opencv_core.Mat newimage = new opencv_core.Mat();
+        opencv_core.Scalar value = new opencv_core.Scalar( 255, 255, 255, 255 );
+        opencv_core.copyMakeBorder(img, newimage, top, bottom, left, right, opencv_core.BORDER_CONSTANT, value  );
+
+        return newimage; //img.apply(new opencv_core.Rect(x, y, width, height));
     }
 
     @Override
