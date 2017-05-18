@@ -1,5 +1,4 @@
-package org.deeplearning4j.examples.deeplogo;
-
+package deeplogo
 import java.awt.Image
 import java.awt.image.BufferedImage
 
@@ -51,6 +50,7 @@ import collection.JavaConversions._
 import org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2YCrCb
 import org.datavec.api.conf.Configuration
 import org.deeplearning4j.examples.convolution.AnimalsClassification
+import org.deeplearning4j.examples.deeplogo.MyImageRecordReader
 import org.nd4j.linalg.api.ndarray.INDArray
 
 /**
@@ -58,12 +58,12 @@ import org.nd4j.linalg.api.ndarray.INDArray
  */
 object LogoClassification extends App{
   protected val log = LoggerFactory.getLogger(classOf[AnimalsClassification])
-  protected var height = 500
-  protected var width = 500
+  protected var height = 300
+  protected var width = 300
   protected var channels = 3
   protected var numExamples = 8240
   protected var numLabels = 33
-  protected var batchSize = 20
+  protected var batchSize = 10
   protected var maxPathPerLabels = 70
   protected var seed = 42
   protected var rng = new Random(seed)
@@ -162,14 +162,14 @@ object LogoClassification extends App{
       .learningRateDecayPolicy(LearningRatePolicy.Step).lrPolicyDecayRate(0.1).lrPolicySteps(100000)
       .regularization(true).l2(2 * 1e-4).momentum(0.9).miniBatch(false)
       .list
-      .layer(0, new ConvolutionLayer.Builder(Array[Int](7, 7), Array[Int](1, 1), Array[Int](3, 3)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
+      .layer(0, new ConvolutionLayer.Builder(Array[Int](7, 7), Array[Int](2, 2), Array[Int](3, 3)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
       .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
-      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(128).biasInit(0).activation(Activation.RELU).build)
+      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(32).biasInit(0).activation(Activation.RELU).build)
       .layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool1").build )
-      .layer(4, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(64).biasInit(nonZeroBias).build)
-      .layer(5, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
-      .layer(6, new DenseLayer.Builder().name("ffn1").nOut(64).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
-      .layer(7, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
+      //.layer(4, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(32).biasInit(nonZeroBias).build)
+      //.layer(5, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
+      .layer(4, new DenseLayer.Builder().name("ffn1").nOut(64).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
+      .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
 //      .layer(0, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
 //            .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
 //            .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(64).biasInit(0).activation(Activation.RELU).build)
@@ -325,10 +325,9 @@ object LogoClassification extends App{
     import java.awt.image.BufferedImage
     import java.awt.image.WritableRaster
     import java.awt.Image._
-    val ratio = 4/3
     val img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
     val a = 255
-    var p =0
+    var p = 0
 
 
     System.out.println("iterator");
@@ -343,7 +342,6 @@ object LogoClassification extends App{
       }
     }
 
-    //img.getScaledInstance(width, width/ratio, Image.SCALE_SMOOTH)
     img
   }
 
