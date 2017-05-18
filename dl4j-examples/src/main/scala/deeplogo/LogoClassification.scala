@@ -10,7 +10,7 @@ import org.datavec.api.split.FileSplit
 import org.datavec.api.split.InputSplit
 import org.datavec.image.loader.NativeImageLoader
 import org.datavec.image.recordreader.ImageRecordReader
-import org.datavec.image.transform.{ColorConversionTransform, FlipImageTransform, ImageTransform, WarpImageTransform}
+import org.datavec.image.transform._
 import org.deeplearning4j.api.storage.StatsStorage
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator
@@ -51,25 +51,28 @@ import org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2YCrCb
 import org.datavec.api.conf.Configuration
 import org.deeplearning4j.examples.convolution.AnimalsClassification
 import org.deeplearning4j.examples.deeplogo.MyImageRecordReader
+import org.deeplearning4j.examples.deeplogo.MyMultiEpochIterator
 import org.nd4j.linalg.api.ndarray.INDArray
+
+import scala.collection.JavaConversions
 
 /**
  * Created by paolo on 15/05/2017.
  */
 object LogoClassification extends App{
   protected val log = LoggerFactory.getLogger(classOf[AnimalsClassification])
-  protected var height = 300
-  protected var width = 300
+  protected var height = 250
+  protected var width = 250
   protected var channels = 3
-  protected var numExamples = 8240
-  protected var numLabels = 33
-  protected var batchSize = 10
-  protected var maxPathPerLabels = 70
+  protected var numExamples = 2240
+  protected var numLabels = 32
+  protected var batchSize = 20
+  protected var maxPathPerLabels = 60
   protected var seed = 42
   protected var rng = new Random(seed)
   protected var listenerFreq = 10
   protected var iterations = 1
-  protected var epochs = 100
+  protected var epochs = 5
   protected var splitTrainTest = 0.8
   protected var nCores = 4
   protected var save = false
@@ -152,23 +155,23 @@ object LogoClassification extends App{
     val nonZeroBias: Double = 1
     val dropOut: Double = 0.5
     val conf: MultiLayerConfiguration = new NeuralNetConfiguration.Builder().seed(seed)
-      .weightInit(WeightInit.DISTRIBUTION)
-      .dist(new NormalDistribution(0.0, 0.01))
+      .weightInit(WeightInit.XAVIER)
+      //.dist(new NormalDistribution(0.0, 0.01))
       .activation(Activation.RELU)
       .updater(Updater.NESTEROVS)
       .iterations(iterations)
       .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
-      .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).learningRate(0.005).biasLearningRate(0.005 * 2)
+      .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).learningRate(0.0005).biasLearningRate(0.0005 * 2)
       .learningRateDecayPolicy(LearningRatePolicy.Step).lrPolicyDecayRate(0.1).lrPolicySteps(100000)
-      .regularization(true).l2(2 * 1e-4).momentum(0.9).miniBatch(false)
+      .regularization(true).l2(2 * 1e-4).momentum(0.95).miniBatch(true)
       .list
-      .layer(0, new ConvolutionLayer.Builder(Array[Int](7, 7), Array[Int](2, 2), Array[Int](3, 3)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
-      .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
-      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(32).biasInit(0).activation(Activation.RELU).build)
-      .layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool1").build )
-      //.layer(4, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(32).biasInit(nonZeroBias).build)
-      //.layer(5, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
-      .layer(4, new DenseLayer.Builder().name("ffn1").nOut(64).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
+      .layer(0, new ConvolutionLayer.Builder(Array[Int](9, 9), Array[Int](2, 2), Array[Int](3, 3)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
+      .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](5, 5), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
+      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
+      //.layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool1").build )
+      //.layer(3, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(32).biasInit(nonZeroBias).build)
+      .layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
+      .layer(4, new DenseLayer.Builder().name("ffn1").nOut(48).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
       .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
 //      .layer(0, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
 //            .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
@@ -194,10 +197,10 @@ object LogoClassification extends App{
     *  - pathFilter = define additional file load filter to limit size and balance batch content
     * */
   val labelMaker = new ParentPathLabelGenerator
-  //val mainPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg/")
+  val mainPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg/")
   //val mainPath = new File("d:\\Users\\andlatel\\Desktop\\jpg\\")
   //val mainPath = new File(System.getProperty("user.dir"), "../../data/FlickrLogos-32_dataset_v2/FlickrLogos-v2/classes/jpg/")
-  val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
+  //val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
   val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, rng)
   //val pathFilter = new BalancedPathFilter(rng, labelMaker, numExamples, numLabels, batchSize)
 
@@ -218,7 +221,8 @@ object LogoClassification extends App{
   val flipTransform2 = new FlipImageTransform(new Random(123))
   val warpTransform = new WarpImageTransform(rng, 42)
   val colorTransform = new ColorConversionTransform(new Random(seed), COLOR_BGR2YCrCb);
-  val transforms = Seq(flipTransform1, warpTransform, colorTransform)
+  val rotateTransform = new RotateImageTransform(rng, 180);
+  val transforms = Seq(flipTransform1,/* warpTransform, */colorTransform)
   /**
     * Data Setup -> normalization
     *  - how to normalize images and generate large dataset to train on
@@ -257,15 +261,11 @@ object LogoClassification extends App{
   log.info("Train model....")
   // Train without transformations
   recordReader.initialize(trainData)
-  var dataIter: RecordReaderDataSetIterator = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
-
-  /*var dataIter2 = new RecordReaderDataSetIterator(recordReader, 1, 1, numLabels)
-  getImage(dataIter2)*/
-
-  scaler.fit(dataIter)
+  var dataIter: DataSetIterator = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
   dataIter.setPreProcessor(scaler)
-  var trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
-  network.fit(trainIter)
+
+  //var trainIter = new MultipleEpochsIterator(epochs, dataIter, nCores)
+
   // Train with transformations
 
 /*
@@ -280,6 +280,15 @@ object LogoClassification extends App{
   })
 */
 
+  val recordReaderFlipped = new MyImageRecordReader(height, width, channels, labelMaker)
+  recordReaderFlipped.initialize(trainData, rotateTransform)
+  var dataIterFlipped: DataSetIterator = new RecordReaderDataSetIterator(recordReaderFlipped, batchSize, 1, numLabels)
+  dataIterFlipped.setPreProcessor(scaler)
+
+  val iterators = Seq(dataIter, dataIterFlipped )
+  var trainIter = new MyMultiEpochIterator(epochs, JavaConversions.asJavaCollection(iterators))
+  network.fit(trainIter)
+
   log.info("Evaluate model....")
   recordReader.initialize(testData)
   val dataIterToEval = new RecordReaderDataSetIterator(recordReader, batchSize, 1, numLabels)
@@ -288,12 +297,12 @@ object LogoClassification extends App{
   val eval = network.evaluate(dataIterToEval)
   log.info(eval.stats(true))
   // Example on how to get predict results with trained model
-  dataIter.reset()
+  /*dataIter.reset()
   val testDataSet = dataIter.next
   val expectedResult = testDataSet.getLabelName(0)
   val predict = network.predict(testDataSet)
   val modelResult = predict.get(0)
-  System.out.print("\nFor a single example that is labeled " + expectedResult + " the model predicted " + modelResult + "\n\n")
+  System.out.print("\nFor a single example that is labeled " + expectedResult + " the model predicted " + modelResult + "\n\n")*/
   if (save) {
     log.info("Save model....")
     val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/")
