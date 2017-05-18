@@ -221,7 +221,7 @@ public class MyMultiEpochIterator implements DataSetIterator{
             return (epochs < numEpochs) && ((!batchedDS.isEmpty() && batchedDS.size() > batch) || batchedDS.isEmpty());
         else
             // either there are still epochs to complete or its the first epoch
-            return (epochs < numEpochs) || (iters.get(currentIter).hasNext() && (epochs == 0 || epochs == numEpochs));
+            return (epochs < numEpochs) || (iters.get(currentIter%itersSize).hasNext() && (epochs == 0 || epochs == numEpochs));
     }
 
     /**

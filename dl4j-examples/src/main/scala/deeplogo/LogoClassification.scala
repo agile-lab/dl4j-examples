@@ -64,10 +64,10 @@ object LogoClassification extends App{
   protected var height = 250
   protected var width = 250
   protected var channels = 3
-  protected var numExamples = 2240
+  protected var numExamples = 1280
   protected var numLabels = 32
   protected var batchSize = 20
-  protected var maxPathPerLabels = 60
+  protected var maxPathPerLabels = 40
   protected var seed = 42
   protected var rng = new Random(seed)
   protected var listenerFreq = 10
@@ -161,18 +161,18 @@ object LogoClassification extends App{
       .updater(Updater.NESTEROVS)
       .iterations(iterations)
       .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
-      .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).learningRate(0.0005).biasLearningRate(0.0005 * 2)
-      .learningRateDecayPolicy(LearningRatePolicy.Step).lrPolicyDecayRate(0.1).lrPolicySteps(100000)
-      .regularization(true).l2(2 * 1e-4).momentum(0.95).miniBatch(true)
+      .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT).learningRate(0.005).biasLearningRate(0.0005 * 2)
+      .learningRateDecayPolicy(LearningRatePolicy.Step).lrPolicyDecayRate(0.05).lrPolicySteps(100000)
+      .regularization(true).l2(1e-5).momentum(0.95).miniBatch(true)
       .list
       .layer(0, new ConvolutionLayer.Builder(Array[Int](9, 9), Array[Int](2, 2), Array[Int](3, 3)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
       .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](5, 5), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
-      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
-      //.layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool1").build )
-      //.layer(3, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(32).biasInit(nonZeroBias).build)
-      .layer(3, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
-      .layer(4, new DenseLayer.Builder().name("ffn1").nOut(48).biasInit(nonZeroBias).dropOut(dropOut).dist(new GaussianDistribution(0, 0.005)).build)
-      .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
+      .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(16).biasInit(nonZeroBias).activation(Activation.RELU).build)
+      .layer(3, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool2").build )
+      .layer(3, new ConvolutionLayer.Builder(Array[Int](3, 3), Array[Int](1, 1), Array[Int](1, 1)).name("cnn4").nOut(32).biasInit(nonZeroBias).build)
+      .layer(4, new SubsamplingLayer.Builder(PoolingType.AVG, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("avgpool2").build)
+      .layer(5, new DenseLayer.Builder().name("ffn1").nOut(48).biasInit(nonZeroBias).dropOut(dropOut)/*.dist(new GaussianDistribution(0, 0.005))*/.build)
+      .layer(6, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
 //      .layer(0, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn1").nIn(channels).nOut(32).biasInit(nonZeroBias).activation(Activation.RELU).build)
 //            .layer(1, new SubsamplingLayer.Builder(PoolingType.MAX, Array[Int](3, 3), Array[Int](2, 2), Array[Int](1, 1)).name("maxpool1").build )
 //            .layer(2, new ConvolutionLayer.Builder(Array[Int](5, 5), Array[Int](1, 1), Array[Int](2, 2)).name("cnn3").nOut(64).biasInit(0).activation(Activation.RELU).build)
