@@ -64,7 +64,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.COLOR_BGR2YCrCb;
  *  - Tune by adjusting learning rate, updaters, activation & loss functions, regularization, ...
  */
 
-public class AnimalsClassification {
+ class AnimalsClassification {
     protected static final Logger log = LoggerFactory.getLogger(AnimalsClassification.class);
     protected static int height = 100;
     protected static int width = 100;

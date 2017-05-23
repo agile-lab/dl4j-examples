@@ -1,11 +1,13 @@
 package org.deeplearning4j.examples.deeplogo;
 
 import org.bytedeco.javacpp.opencv_core;
+import org.bytedeco.javacpp.opencv_imgproc;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.datavec.image.loader.NativeImageLoader;
 import org.datavec.image.transform.ImageTransform;
 
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
+import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 
 /**
  * Created by paolo on 18/05/2017.
@@ -39,8 +41,12 @@ public class MyNativeImageLoader extends NativeImageLoader {
         }
 
         opencv_core.Mat newimage = new opencv_core.Mat();
-        opencv_core.Scalar value = new opencv_core.Scalar( 255, 255, 255, 255 );
+        opencv_core.Scalar value = new opencv_core.Scalar( 255, 0, 0, 0 );
         opencv_core.copyMakeBorder(img, newimage, top, bottom, left, right, opencv_core.BORDER_CONSTANT, value  );
+
+        //opencv_core.Mat bwimage = new opencv_core.Mat();
+        //gray scale
+        //org.bytedeco.javacpp.opencv_imgproc.cvtColor(newimage, bwimage, opencv_imgproc.COLOR_RGB2GRAY);
 
         return newimage; //img.apply(new opencv_core.Rect(x, y, width, height));
     }

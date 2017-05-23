@@ -1,31 +1,33 @@
-package net
+package deeplogo
 
 import java.util.Random
 
 import org.deeplearning4j.examples.convolution.AnimalsClassification
 import org.deeplearning4j.nn.conf.distribution.Distribution
 import org.deeplearning4j.nn.conf.layers.{ConvolutionLayer, DenseLayer, SubsamplingLayer}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
-  * Created by andlatel on 17/05/2017.
+  * Created by andlatel on 20/05/2017.
   */
-trait ConfigurationNet {
-  val height = 100
-  val width = 100
+trait Configuration {
+  val height = 150
+  val width = 150
   val channels = 3
-  val numExamples = 8240
-  val numLabels = 33
-  val batchSize = 64
-  val seed = 42
+  val numExamples = 140//2240
+  val numLabels = 7//32
+  val batchSize = 10//16
+  val maxPathPerLabels = 20//160
+  val seed = 123
   val rng = new Random(seed)
-  val listenerFreq = 5
+  val listenerFreq = 10
   val iterations = 1
-  val epochs = 100
-  val splitTrainTest = 0.75
-  val nCores = 4
+  val epochs = 150
+  val splitTrainTest = 0.8
+  val nCores = 2
   val save = false
-  val modelType = "alexnet"
+  val modelType = "custom" // LeNet, AlexNet or Custom but you need to fill it out
+
 
   def convInit(name: String, in: Int, out: Int, kernel: Array[Int], stride: Array[Int], pad: Array[Int], bias: Double): ConvolutionLayer =
     return new ConvolutionLayer.Builder(kernel, stride, pad).name(name).nIn(in).nOut(out).biasInit(bias).build
@@ -46,4 +48,3 @@ trait ConfigurationNet {
     return new DenseLayer.Builder().name(name).nOut(out).biasInit(bias).dropOut(dropOut).dist(dist).build
   }
 }
-

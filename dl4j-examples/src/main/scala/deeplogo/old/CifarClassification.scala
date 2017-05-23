@@ -1,4 +1,4 @@
-package deeplogo
+package deeplogo.old
 
 //import deeplogo.LogoClassificationS._
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator
@@ -7,10 +7,6 @@ import org.deeplearning4j.eval.Evaluation
 import org.deeplearning4j.nn.api.OptimizationAlgorithm
 import org.deeplearning4j.nn.conf.inputs.InputType
 import org.deeplearning4j.nn.conf.{MultiLayerConfiguration, NeuralNetConfiguration, Updater}
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener
-import org.deeplearning4j.ui.stats.StatsListener
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage
-import scala.collection.JavaConversions._
 
 /**
   * Created by andlatel on 17/05/2017.
@@ -19,9 +15,7 @@ object CifarClassification extends App{
   val dataSetIterator: CifarDataSetIterator = new CifarDataSetIterator(100, 5000, true);
   System.out.println(dataSetIterator.getLabels)
 
-  import org.deeplearning4j.nn.conf.layers.ConvolutionLayer
-  import org.deeplearning4j.nn.conf.layers.OutputLayer
-  import org.deeplearning4j.nn.conf.layers.SubsamplingLayer
+  import org.deeplearning4j.nn.conf.layers.{ConvolutionLayer, OutputLayer, SubsamplingLayer}
   import org.deeplearning4j.nn.weights.WeightInit
   import org.nd4j.linalg.activations.Activation
   import org.nd4j.linalg.lossfunctions.LossFunctions
