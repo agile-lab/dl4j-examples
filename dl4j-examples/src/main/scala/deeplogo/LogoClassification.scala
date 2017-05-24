@@ -50,7 +50,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     //val mainPath = new File("d:\\Users\\andlatel\\Desktop\\MyLogosExt_v2.0\\")
 
     //val mainPath = new File(System.getProperty("user.home"), "data/images/")
-    val mainPath = new File(System.getProperty("user.home"), "data/MyLogosExt_v2.0/")
+    val mainPath = new File(System.getProperty("user.dir"), "../../../data/MyLogos/")
     //val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
 
     val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)

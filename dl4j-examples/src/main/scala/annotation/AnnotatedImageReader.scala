@@ -24,12 +24,12 @@ class AnnotatedImageReader(folderPath: String, annotationDataSet: AnnotationData
       val image: File = iter.next
       currentFile = image
       if (image.isDirectory) return next
-      try
+      try {
         invokeListeners(image)
 
-        if(image.getAbsolutePath.contains(folderPath)){
+        if (image.getAbsolutePath.contains(folderPath)) {
 
-        }else{
+        } else {
           throw new Exception("parameter folder path doesn't match with fetched files")
         }
 
@@ -60,8 +60,7 @@ class AnnotatedImageReader(folderPath: String, annotationDataSet: AnnotationData
 
         if (appendLabel)
           ret.add(new IntWritable(labels.indexOf(getLabel(image.getPath))))
-
-
+      }
       catch {
         case e: Exception => {
           throw new RuntimeException(e)
