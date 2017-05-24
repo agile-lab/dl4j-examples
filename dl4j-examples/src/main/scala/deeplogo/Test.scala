@@ -36,7 +36,7 @@ class Test(conf: Configuration){
     val trainData = inputSplit(0)
 
 
-    val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/")
+    //val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/")
     //val network = ModelSerializer.restoreMultiLayerNetwork(basePath + "model.bin", true)
     val network = ModelSerializer.restoreMultiLayerNetwork("d:\\Users\\andlatel\\Desktop\\model.bin", true)
 

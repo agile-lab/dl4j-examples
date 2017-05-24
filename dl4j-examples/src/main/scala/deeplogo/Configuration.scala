@@ -15,10 +15,10 @@ trait Configuration {
   val height = 175
   val width = 175
   val channels = 3
-  val numExamples = 210//2240
+  val numExamples = 52//2240
   val numLabels = 7//32
-  val batchSize = 21//16
-  val maxPathPerLabels = 30//160
+  val batchSize = 10//16
+  val maxPathPerLabels = 8//160
   val seed = 123
   val rng = new Random(seed)
   val listenerFreq = 10
