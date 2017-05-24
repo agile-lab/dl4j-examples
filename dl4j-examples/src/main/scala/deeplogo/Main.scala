@@ -11,4 +11,6 @@ object Main extends App {
   val net = new CustomNet(conf).createNet()
 
   new LogoClassification(net, conf).exec()
+
+  //new Test(conf).test()
 }

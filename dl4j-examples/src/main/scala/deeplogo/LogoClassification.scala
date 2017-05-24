@@ -37,6 +37,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
 
   def exec() = {
     log.info("Load data....")
+
     /**
       * Data Setup -> organize and limit data file paths:
       *  - mainPath = path to image files
@@ -46,17 +47,17 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     val labelMaker = new ParentPathLabelGenerator
 
     //val mainPath = new File("d:\\Users\\andlatel\\Desktop\\images\\")
-    //val mainPathTest = new File("d:\\Users\\andlatel\\Desktop\\jpg2\\")
+    //val mainPath = new File("d:\\Users\\andlatel\\Desktop\\MyLogosExt_v2.0\\")
 
     //val mainPath = new File(System.getProperty("user.home"), "data/images/")
-    val mainPath = new File(System.getProperty("user.home"), "data/MyLogosExt/")
+    val mainPath = new File(System.getProperty("user.home"), "data/MyLogosExt_v2.0/")
     //val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
 
     val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
     //val fileSplitTest = new FileSplit(mainPathTest, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
 
-    //val pathFilter = new RandomPathFilter(conf.rng, NativeImageLoader.ALLOWED_FORMATS, 0)
-    val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
+    val pathFilter = new RandomPathFilter(conf.rng, NativeImageLoader.ALLOWED_FORMATS, 0)
+    //val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
 
 
     /**
@@ -101,9 +102,13 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     var trainIter = new MultipleEpochsIterator(conf.epochs, dataIter)
 //    getImage[MultipleEpochsIterator](trainIter)
     network.fit(trainIter)
+
+
     log.info("Evaluate model....")
+    recordReader.reset()
     recordReader.initialize(testData)
     dataIter.setPreProcessor(scaler)
+
     val eval = network.evaluate(dataIter)
     log.info(eval.stats(true))
 

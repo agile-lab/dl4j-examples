@@ -11,21 +11,21 @@ import org.slf4j.{Logger, LoggerFactory}
   * Created by andlatel on 20/05/2017.
   */
 trait Configuration {
-  val height = 150
-  val width = 150
+  val height = 175
+  val width = 175
   val channels = 3
-  val numExamples = 140//2240
-  val numLabels = 7//32
-  val batchSize = 10//16
+  val numExamples = 891//2240
+  val numLabels = 8//32
+  val batchSize = 20//16
   val maxPathPerLabels = 20//160
   val seed = 123
   val rng = new Random(seed)
   val listenerFreq = 10
   val iterations = 1
-  val epochs = 150
+  val epochs = 200
   val splitTrainTest = 0.8
   val nCores = 2
-  val save = false
+  val save = true
   val modelType = "custom" // LeNet, AlexNet or Custom but you need to fill it out
 
 
