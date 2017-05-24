@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
+import annotation.{AnnotatedImageReader, AnnotationDataSet, SelectiveSearchAnnotation}
 import deeplogo.old.AnimalsClassification
 import deeplogo.old.LogoClassification.{height, log, width}
 import org.apache.commons.io.FilenameUtils
@@ -51,6 +52,8 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
 
     //val mainPath = new File(System.getProperty("user.home"), "data/images/")
     val mainPath = new File(System.getProperty("user.dir"), "../../../data/MyLogos/")
+    val testPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg7classes/")
+    val annotationPath = new File(System.getProperty("user.dir"), "../../annotations.csv")
     //val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
 
     val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
@@ -67,7 +70,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     val inputSplit: Array[InputSplit] = fileSplit.sample(pathFilter, conf.numExamples * (conf.splitTrainTest), conf.numExamples * (1 - conf.splitTrainTest))
     //val inputSplitTest: Array[InputSplit] = fileSplitTest.sample(pathFilterTest, 2240, 0)
     val trainData = inputSplit(0)
-    val testData  = inputSplit(1)
+    //val testData  = inputSplit(1)
 
     /** Data Setup -> normalization
       *  - how to normalize images and generate large dataset to train on
@@ -103,13 +106,21 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
 //    getImage[MultipleEpochsIterator](trainIter)
     network.fit(trainIter)
 
+    //------------------------------------------------------------------------
+
+    val testData = new FileSplit(testPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
+
+    val annotationDataSet = new SelectiveSearchAnnotation()
+    annotationDataSet.loadFromFile(annotationPath.getAbsolutePath)
+
+    val testRecordReader = new AnnotatedImageReader(testPath.getAbsolutePath, annotationDataSet, conf.height, conf.width, conf.channels, labelMaker)
 
     log.info("Evaluate model....")
-    recordReader.reset()
-    recordReader.initialize(testData)
-    dataIter.setPreProcessor(scaler)
+    testRecordReader.initialize(testData)
+    val testDataIter: DataSetIterator   = new RecordReaderDataSetIterator(testRecordReader, conf.batchSize, 1, conf.numLabels)
+    testDataIter.setPreProcessor(scaler)
 
-    val eval = network.evaluate(dataIter)
+    val eval = network.evaluate(testDataIter)
     log.info(eval.stats(true))
 
     if (conf.save) {
