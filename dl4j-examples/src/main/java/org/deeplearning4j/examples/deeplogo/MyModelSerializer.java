@@ -143,7 +143,7 @@ public class MyModelSerializer{
      * @return the loaded multi layer network
      * @throws IOException
      */
-    public static MultiLayerNetwork restoreMultiLayerNetwork(@NonNull File file) throws IOException {
+    public static MyMultiLayerNetwork restoreMultiLayerNetwork(@NonNull File file) throws IOException {
         return restoreMultiLayerNetwork(file, true);
     }
 
@@ -154,7 +154,7 @@ public class MyModelSerializer{
      * @return the loaded multi layer network
      * @throws IOException
      */
-    public static MultiLayerNetwork restoreMultiLayerNetwork(@NonNull File file, boolean loadUpdater)
+    public static MyMultiLayerNetwork restoreMultiLayerNetwork(@NonNull File file, boolean loadUpdater)
         throws IOException {
         ZipFile zipFile = new ZipFile(file);
 
@@ -246,7 +246,7 @@ public class MyModelSerializer{
 
         if (gotConfig && gotCoefficients) {
             MultiLayerConfiguration confFromJson = MultiLayerConfiguration.fromJson(json);
-            MultiLayerNetwork network = new MultiLayerNetwork(confFromJson);
+            MyMultiLayerNetwork network = new MyMultiLayerNetwork(confFromJson);
             network.init(params, false);
 
             if (gotUpdaterState && updaterState != null) {
@@ -268,7 +268,7 @@ public class MyModelSerializer{
      * @return the loaded multi layer network
      * @throws IOException
      */
-    public static MultiLayerNetwork restoreMultiLayerNetwork(@NonNull InputStream is, boolean loadUpdater)
+    public static MyMultiLayerNetwork restoreMultiLayerNetwork(@NonNull InputStream is, boolean loadUpdater)
         throws IOException {
         File tmpFile = File.createTempFile("restore", "multiLayer");
         tmpFile.deleteOnExit();
@@ -276,7 +276,7 @@ public class MyModelSerializer{
         return restoreMultiLayerNetwork(tmpFile, loadUpdater);
     }
 
-    public static MultiLayerNetwork restoreMultiLayerNetwork(@NonNull InputStream is) throws IOException {
+    public static MyMultiLayerNetwork restoreMultiLayerNetwork(@NonNull InputStream is) throws IOException {
         return restoreMultiLayerNetwork(is, true);
     }
 
@@ -288,7 +288,7 @@ public class MyModelSerializer{
      *
      * @throws IOException
      */
-    public static MultiLayerNetwork restoreMultiLayerNetwork(@NonNull String path) throws IOException {
+    public static MyMultiLayerNetwork restoreMultiLayerNetwork(@NonNull String path) throws IOException {
         return restoreMultiLayerNetwork(new File(path), true);
     }
 
@@ -299,7 +299,7 @@ public class MyModelSerializer{
      *
      * @throws IOException
      */
-    public static MultiLayerNetwork restoreMultiLayerNetwork(@NonNull String path, boolean loadUpdater)
+    public static MyMultiLayerNetwork restoreMultiLayerNetwork(@NonNull String path, boolean loadUpdater)
         throws IOException {
         return restoreMultiLayerNetwork(new File(path), loadUpdater);
     }
