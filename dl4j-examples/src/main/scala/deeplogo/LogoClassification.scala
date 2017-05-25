@@ -48,21 +48,19 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     val labelMaker = new ParentPathLabelGenerator
 
     //val mainPath = new File("d:\\Users\\andlatel\\Desktop\\images\\")
-    val mainPath = new File("d:\\Users\\andlatel\\Desktop\\MyLogosExt_v1.0\\")
+    val mainPath = new File("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\dataset\\MyLogosExt_v2.0\\")
 
     //val mainPath = new File(System.getProperty("user.home"), "data/images/")
 
     //val mainPath = new File(System.getProperty("user.home"), "data/MyLogosExt_v2.0/")
     //val mainPath = new File(System.getProperty("user.dir"), "../../../data/MyLogos/")
-    //val testPath = new File(System.getProperty("user.dir"), "../../../data/FlickrLogos-v2/classes/jpg7classes/")
-    //val annotationPath = new File(System.getProperty("user.dir"), "../../annotations.csv")
     //val mainPath = new File(System.getProperty("user.home"), "data/FlickrLogos-v2/classes/jpg/")
 
     val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
     //val fileSplitTest = new FileSplit(mainPathTest, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
 
-    val pathFilter = new RandomPathFilter(conf.rng, NativeImageLoader.ALLOWED_FORMATS, 0)
-    //val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
+    //val pathFilter = new RandomPathFilter(conf.rng, NativeImageLoader.ALLOWED_FORMATS, 0)
+    val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
 
 
     /**
@@ -72,7 +70,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     val inputSplit: Array[InputSplit] = fileSplit.sample(pathFilter, conf.numExamples * (conf.splitTrainTest), conf.numExamples * (1 - conf.splitTrainTest))
     //val inputSplitTest: Array[InputSplit] = fileSplitTest.sample(pathFilterTest, 2240, 0)
     val trainData = inputSplit(0)
-    val testData  = inputSplit(1)
+    //val testData  = inputSplit(1)
 
     /** Data Setup -> normalization
       *  - how to normalize images and generate large dataset to train on
@@ -91,9 +89,9 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
       *  - dataIter = a generator that only loads one batch at a time into memory to save memory
       *  - trainIter = uses MultipleEpochsIterator to ensure model runs through the data for all epochs
       **/
-    val transform = new MultiImageTransform(conf.rng,
-      new CropImageTransform(256),
-      new FlipImageTransform())
+    //val transform = new MultiImageTransform(conf.rng,
+    //  new CropImageTransform(256),
+    //  new FlipImageTransform())
 
 
     log.info("Train model....")
@@ -105,33 +103,18 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     dataIter.setPreProcessor(scaler)
 
     var trainIter = new MultipleEpochsIterator(conf.epochs, dataIter)
-//    getImage[MultipleEpochsIterator](trainIter)
+    //getImage[MultipleEpochsIterator](trainIter)
     network.fit(trainIter)
 
-    //------------------------------------------------------------------------
-
-    val testData = new FileSplit(testPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
-
-    val annotationDataSet = new SelectiveSearchAnnotation()
-    annotationDataSet.loadFromFile(annotationPath.getAbsolutePath)
-
-    val testRecordReader = new AnnotatedImageReader(testPath.getAbsolutePath, annotationDataSet, conf.height, conf.width, conf.channels, labelMaker)
-
-    log.info("Evaluate model....")
-    testRecordReader.initialize(testData)
-    val testDataIter: DataSetIterator   = new RecordReaderDataSetIterator(testRecordReader, conf.batchSize, 1, conf.numLabels)
-    testDataIter.setPreProcessor(scaler)
-
-    val eval = network.evaluate(testDataIter)
-    log.info(eval.stats(true))
 
     if (conf.save) {
       log.info("Save model....")
-      val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/")
+      //val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "dl4j-examples/src/main/resources/")
+      val basePath = "d:\\Users\\andlatel\\Desktop\\"
       ModelSerializer.writeModel(network, basePath + "model.bin", true)
     }
-    log.info("****************Example finished********************")
 
+    log.info("End.")
 
   }
 

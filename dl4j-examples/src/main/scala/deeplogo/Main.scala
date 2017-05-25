@@ -12,5 +12,5 @@ object Main extends App {
 
   //new LogoClassification(net, conf).exec()
 
-  new Test(conf).test()
+  new Test(conf).regionTest()
 }
