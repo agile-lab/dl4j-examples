@@ -33,8 +33,8 @@ class AnnotatedImageReader(folderPath: String, annotationDataSet: AnnotationData
           throw new Exception("parameter folder path doesn't match with fetched files")
         }
 
-        val subFile = image.getAbsolutePath.substring(folderPath.size)
-        val splits = subFile.split('/')
+        val subFile = image.getAbsolutePath.substring(folderPath.size+1).replaceAll("\\\\","/")
+        val splits = subFile.split("/")
         val subFolder = splits(0)
         val file = splits(1)
 
