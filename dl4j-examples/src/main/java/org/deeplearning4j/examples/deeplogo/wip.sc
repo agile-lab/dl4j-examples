@@ -1,4 +1,5 @@
 import org.nd4j.linalg.api.ndarray.INDArray
+
 import org.nd4j.linalg.cpu.nativecpu.NDArray
 import org.nd4j.linalg.factory.Nd4j
 
@@ -10,7 +11,8 @@ val a:INDArray = new NDArray(s);
 val b:INDArray = new NDArray(s2);
 
 val c:INDArray = new NDArray(a.shape());
-val realOutcomeIndex = Nd4j.argMax(a, 1)
+
+/*val realOutcomeIndex = Nd4j.argMax(a, 1)
 realOutcomeIndex.shape()(0)
 
 val c1= realOutcomeIndex.shape()(0)-1
@@ -21,7 +23,13 @@ for(i <- 0 to realOutcomeIndex.shape()(0)-1){
 
 c
 
-c.add(c)
+c.add(c)*/
+
+
+c.put(1, b)
+
+
+
 
 //c
 

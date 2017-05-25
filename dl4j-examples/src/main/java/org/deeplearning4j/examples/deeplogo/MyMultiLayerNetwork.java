@@ -2323,7 +2323,7 @@ public class MyMultiLayerNetwork implements Serializable, Classifier, Layer {
     public synchronized Updater getUpdater() {
         if (solver == null) {
             solver = new Solver.Builder().configure(conf()).listeners(getListeners()).model(this).build();
-            solver.getOptimizer().setUpdater(UpdaterCreator.getUpdater(this));
+            solver.getOptimizer().setUpdater(MyUpdaterCreator.getUpdater(this));
         }
         return solver.getOptimizer().getUpdater();
     }

@@ -12,22 +12,22 @@ import org.slf4j.{Logger, LoggerFactory}
   */
 trait Configuration {
 
-  val height = 175
-  val width = 175
+  val height = 20
+  val width = 20
   val channels = 3
-  val numExamples = 52//2240
-  val numLabels = 7//32
-  val batchSize = 10//16
+  val numExamples = 360//2240
+  val numLabels = 8//32
+  val batchSize = 20//16
   val maxPathPerLabels = 8//160
   val seed = 123
   val rng = new Random(seed)
   val listenerFreq = 10
   val iterations = 1
-  val epochs = 200
+  val epochs = 1
   val splitTrainTest = 0.8
   val nCores = 2
   val save = true
-  val modelType = "custom" // LeNet, AlexNet or Custom but you need to fill it out
+  val modelType = "custom" //LeNet, AlexNet or Custom but you need to fill it out
 
 
   def convInit(name: String, in: Int, out: Int, kernel: Array[Int], stride: Array[Int], pad: Array[Int], bias: Double): ConvolutionLayer =

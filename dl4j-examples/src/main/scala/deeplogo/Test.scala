@@ -66,7 +66,7 @@ class Test(conf: Configuration){
     val testData = new FileSplit(testPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
     val scaler = new ImagePreProcessingScaler(0, 1)
 
-    val network = MyModelSerializer.restoreMultiLayerNetwork("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\modello\\model.bin", true)
+    val network = ModelSerializer.restoreMultiLayerNetwork("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\modello\\model.bin", true)
 
     val annotationDataSet = new SelectiveSearchAnnotation()
     annotationDataSet.loadFromFile(annotationPath.getAbsolutePath)
