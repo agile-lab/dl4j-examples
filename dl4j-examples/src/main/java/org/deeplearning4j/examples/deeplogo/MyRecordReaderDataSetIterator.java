@@ -1,6 +1,5 @@
 package org.deeplearning4j.examples.deeplogo;
 
-import annotation.MultiData;
 import annotation.MultiNDArrayWritable;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,6 @@ import org.datavec.api.records.reader.SequenceRecordReader;
 import org.datavec.api.writable.Writable;
 import org.datavec.common.data.NDArrayWritable;
 import org.deeplearning4j.exception.DL4JInvalidInputException;
-import org.jfree.data.general.Dataset;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.DataSetPreProcessor;
@@ -27,10 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import scala.collection.JavaConversions;
-import scala.collection.JavaConversions._;
 
 /**
  * Created by andlatel on 24/05/2017.
@@ -170,6 +164,9 @@ public class MyRecordReaderDataSetIterator implements DataSetIterator {
                 } else {
                     List<Writable> record = recordReader.next();
                     dataSets.add(myGetDataSet(record));
+
+                    //batchNum++;
+                    //return (myGetDataSet(record));
                 }
             }
         }
@@ -178,7 +175,8 @@ public class MyRecordReaderDataSetIterator implements DataSetIterator {
         if (dataSets.isEmpty())
             return new DataSet();
 
-        DataSet ret = DataSet.merge(dataSets);
+        DataSet ret = MyDataSet.merge(dataSets);
+
         if (collectMetaData) {
             ret.setExampleMetaData(meta);
         }
@@ -215,10 +213,9 @@ public class MyRecordReaderDataSetIterator implements DataSetIterator {
         }).collect(Collectors.toList());*/
 
         DataSet finalDataset = new org.nd4j.linalg.dataset.DataSet();
-        ArrayList<DataSet> d = new ArrayList<DataSet>();
+        List<DataSet> dl = new ArrayList<DataSet>();
         Iterator<Writable> currListIter = regionsImage.iterator();
         int i=0;
-        MultiData dat = new MultiData();
         while(currListIter.hasNext()){
             Writable currElem = currListIter.next();
             if ( currElem instanceof NDArrayWritable) {
@@ -228,12 +225,16 @@ public class MyRecordReaderDataSetIterator implements DataSetIterator {
 
                 NDArrayWritable ndArrayWritable = (NDArrayWritable) currElem;
                 featureVector = ndArrayWritable.get();
-                finalDataset.addRow(new DataSet(featureVector, label), i);
+                //DataSet dat = new DataSet(featureVector, label);
+                //finalDataset.addRow(new DataSet(featureVector, label), i);
+                dl.add(new DataSet(featureVector, label));
                 i++;
 
             }
         }
-        return finalDataset;
+
+        MyDataSet res = new MyDataSet(dl);
+        return res;
     }
 
     private DataSet getDataSet(List<Writable> record) {
@@ -407,6 +408,11 @@ public class MyRecordReaderDataSetIterator implements DataSetIterator {
     @Override
     public void setPreProcessor(org.nd4j.linalg.dataset.api.DataSetPreProcessor preProcessor) {
         this.preProcessor = preProcessor;
+    }
+
+    @Override
+    public DataSetPreProcessor getPreProcessor() {
+        return null;
     }
 
     @Override

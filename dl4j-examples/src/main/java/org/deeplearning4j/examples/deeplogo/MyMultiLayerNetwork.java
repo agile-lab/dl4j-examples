@@ -1,5 +1,6 @@
 package org.deeplearning4j.examples.deeplogo;
 
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.val;
 import org.apache.commons.lang3.ArrayUtils;
@@ -19,6 +20,7 @@ import org.deeplearning4j.nn.conf.layers.FeedForwardLayer;
 import org.deeplearning4j.nn.gradient.DefaultGradient;
 import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.layers.FrozenLayer;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.updater.MultiLayerUpdater;
 import org.deeplearning4j.nn.updater.UpdaterCreator;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -43,6 +45,8 @@ import org.nd4j.linalg.util.FeatureUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -2483,7 +2487,7 @@ public class MyMultiLayerNetwork implements Serializable, Classifier, Layer {
                 return x.add(y);
             }).get();
 
-            evaluation.eval(labels, reduce, meta);
+            //evaluation.eval(labels, reduce, meta);
 
         }
     }
