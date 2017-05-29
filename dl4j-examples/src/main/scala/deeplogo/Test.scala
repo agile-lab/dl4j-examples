@@ -30,7 +30,7 @@ class Test(conf: Configuration){
 
     val labelMaker = new ParentPathLabelGenerator
 
-    val mainPath = new File("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\dataset\\MyLogosExt_v2.0\\")
+    val mainPath = new File("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\dataset\\jpg7classes\\")
     val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
     val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
 
@@ -40,7 +40,6 @@ class Test(conf: Configuration){
     //val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "src/main/resources/")
     //val network = ModelSerializer.restoreMultiLayerNetwork(basePath + "model.bin", true)
     val network = ModelSerializer.restoreMultiLayerNetwork("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\modello\\model.bin", true)
-
 
     val testData = inputSplit(0)
 
@@ -66,7 +65,7 @@ class Test(conf: Configuration){
     val testData = new FileSplit(testPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
     val scaler = new ImagePreProcessingScaler(0, 1)
 
-    val network = ModelSerializer.restoreMultiLayerNetwork("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\modello\\model.bin", true)
+    val network = MyModelSerializer.restoreMultiLayerNetwork("d:\\Users\\andlatel\\Desktop\\Documents Project\\deeplogo\\modello\\model.bin", true)
 
     val annotationDataSet = new SelectiveSearchAnnotation()
     annotationDataSet.loadFromFile(annotationPath.getAbsolutePath)
@@ -75,7 +74,7 @@ class Test(conf: Configuration){
 
     log.info("Evaluate model....")
     testRecordReader.initialize(testData)
-    val testDataIter: DataSetIterator   = new MyRecordReaderDataSetIterator(testRecordReader, 2, 1, conf.numLabels)
+    val testDataIter: DataSetIterator   = new MyRecordReaderDataSetIterator(testRecordReader, conf.batchSize, 1, conf.numLabels)
     testDataIter.setPreProcessor(scaler)
 
     val eval = network.evaluate(testDataIter)
