@@ -2452,44 +2452,59 @@ public class MyMultiLayerNetwork implements Serializable, Classifier, Layer {
         }
 
         while (iterator.hasNext()) {
-            DataSet next = iterator.next();
-            List<DataSet> imageslist = next.asList();
-            ArrayList<INDArray> outList = new ArrayList<INDArray>();
-            for(DataSet image: imageslist){
-                if (next.getFeatureMatrix() == null || next.getLabels() == null)
-                    break;
 
-                INDArray features = next.getFeatures();
-                INDArray labels = next.getLabels();
+           DataSet next = iterator.next();
+
+            if (next.getFeatureMatrix() == null || next.getLabels() == null)
+                break;
+
+            INDArray imagePrediction = new NDArray( next.numExamples(), next.get(0).getLabels().columns());
+            INDArray realLabelPrediction = new NDArray( next.numExamples(), next.get(0).getLabels().columns());
+
+            for(int countImage=0; countImage < next.numExamples(); countImage++){
+                DataSet image = next.get(countImage);
+
+                INDArray features = image.getFeatures();
+                INDArray labels = image.getLabels();
+                int nRegions=0;
+                //Attention, images hasn't same region number. Region dimesion is set to max. Find number of region for all images: label have only 0.
+                for(; nRegions<labels.shape()[0]; nRegions++){
+                    if(labels.getRow(nRegions).sumNumber().intValue() == 0)
+                        break;
+                }
 
                 INDArray out;
                 if (next.hasMaskArrays()) {
-                    INDArray fMask = next.getFeaturesMaskArray();
-                    INDArray lMask = next.getLabelsMaskArray();
+                    INDArray fMask = image.getFeaturesMaskArray();
+                    INDArray lMask = image.getLabelsMaskArray();
                     out = this.output(features, false, fMask, lMask);
 
                     //Assume this is time series data. Not much point having a mask array for non TS data
                     evaluation.evalTimeSeries(labels, out, lMask);
                 } else {
                     out = this.output(features, false);
-                    INDArray c = new NDArray(out.shape());
+                    //is an array with dimension number of labels.
+                    INDArray predictForAllRegion = new NDArray(labels.size(1),1);
                     INDArray realOutcomeIndex = Nd4j.argMax(out, 1);
-                    for(int i=0; i < realOutcomeIndex.shape()[0]; i++){
-                        double index = realOutcomeIndex.getDouble(i, 0);
-                        c.putScalar(i, (int)index, 1.0);
+
+                    for(int c=0; c < nRegions; c++){
+                        double index = realOutcomeIndex.getDouble(c, 0);
+                        predictForAllRegion.putScalar((int)index, 0, 1.0);
                     }
+
+                    imagePrediction.putRow(countImage, predictForAllRegion);
+                    realLabelPrediction.putRow(countImage, labels.getRow(0));
+
+                    //int tp = predictForAllRegion.mul(labels.getRow(0)).sumNumber().intValue();
+
                 }
+
+
             }
+            
+            evaluation.eval(realLabelPrediction, imagePrediction, null);
 
-            List<Serializable> meta = next.getExampleMetaData();
-
-            INDArray reduce = outList.stream().reduce((x, y) -> {
-                return x.add(y);
-            }).get();
-
-            //evaluation.eval(labels, reduce, meta);
-
-        }
+        }//fine number batch
     }
 
     /**
@@ -2518,7 +2533,7 @@ public class MyMultiLayerNetwork implements Serializable, Classifier, Layer {
         if (labelsList == null)
             labelsList = iterator.getLabels();
 
-        Evaluation e = new Evaluation(labelsList, topN);
+        MyEvaluation e = new MyEvaluation(labelsList, topN);
         doEvaluation(iterator, e);
 
         return e;
