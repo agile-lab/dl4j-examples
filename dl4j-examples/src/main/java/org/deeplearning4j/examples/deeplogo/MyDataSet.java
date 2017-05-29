@@ -50,6 +50,9 @@ public class MyDataSet extends DataSet {
         INDArray featuresMaskOutForImage = null;
         INDArray labelsMaskOutForImage = null;
 
+        INDArray[] featuresImageToMerge = new INDArray[data.size()];
+        INDArray[] labelsImageToMerge = new INDArray[data.size()];
+
         if (data.isEmpty())
             throw new IllegalArgumentException("Unable to merge empty dataset");
 
@@ -107,6 +110,7 @@ public class MyDataSet extends DataSet {
                 case 4:
                     featuresOutForImage = merge4dCnnData(featuresRegionSameImageToMerge);
                     featuresMaskOutForImage = null;
+                    featuresImageToMerge[countImage] = featuresOutForImage;
                     break;
                 default:
                     throw new IllegalStateException(
@@ -118,6 +122,7 @@ public class MyDataSet extends DataSet {
                 case 2:
                     labelsOutForImage =  merge2d(labelsSameImageToMerge);
                     labelsMaskOutForImage = null;
+                    labelsImageToMerge[countImage] = labelsOutForImage;
                     break;
                 case 3:
                     //Time series data: may also have mask arrays...
@@ -143,12 +148,18 @@ public class MyDataSet extends DataSet {
                         "Cannot merge examples: labels rank must be in range 2 to 4 inclusive. First example labels shape: "
                             + Arrays.toString(data.get(0).getLabels().shape()));
             }
-
-
             countImage++;
         }
 
-        DataSet dataset = new DataSet(featuresOutForImage, labelsOutForImage, featuresMaskOutForImage, labelsMaskOutForImage);
+        //Merge Image Feature in new dimension
+        INDArray mergeFetures5Dimension =  merge5dCnnData(featuresImageToMerge);
+        //Merge Image Labels in new dimension
+        INDArray mergeLabel =  mergeWithAdd3d(labelsImageToMerge);
+
+        labelsMaskOutForImage = null;
+        featuresMaskOutForImage = null;
+
+        DataSet dataset = new DataSet(mergeFetures5Dimension, mergeLabel, featuresMaskOutForImage, labelsMaskOutForImage);
         return dataset;
 
         /*
@@ -257,6 +268,8 @@ public class MyDataSet extends DataSet {
         return dataset;*/
     }
 
+
+
     private static INDArray[] mergeTimeSeries(INDArray[] data, INDArray[] mask) {
         if (data.length == 1)
             return new INDArray[] {data[0], (mask == null ? null : mask[0])};
@@ -331,6 +344,58 @@ public class MyDataSet extends DataSet {
         return new INDArray[] {out, outMask};
     }
 
+    private static INDArray merge5dCnnData(INDArray[] data) {
+        if (data.length == 1)
+            return data[0];
+
+        int[] outSize = new int[5]; //[examples,regions,depth,width,height]
+
+        for (int i = 1; i < data[0].shape().length; i++) {
+            outSize[i+1] = data[0].shape()[i];
+        }
+
+        for (int i = 0; i < data.length; i++) {
+            outSize[0] += 1;
+            //Attention, images hasn't same region number. Region dimesion is set to max.
+            outSize[1] = Integer.max(outSize[1], data[i].shape()[0]);
+        }
+
+        INDArray out = Nd4j.create(outSize, 'c');
+        int examplesSoFar = 0;
+        INDArrayIndex[] indexes = new INDArrayIndex[5];
+
+        indexes[2] = all();
+        indexes[3] = all();
+        indexes[4] = all();
+
+        for (int i = 0; i < data.length; i++) {
+            //Check shapes:
+            int[] thisShape = data[i].shape();
+            if (thisShape.length != 4)
+                throw new IllegalStateException("Cannot merge CNN data: first DataSet data has shape "
+                    + Arrays.toString(data[0].shape()) + ", " + i + "th example has shape "
+                    + Arrays.toString(thisShape));
+            /*for (int j = 1; j < 4; j++) {
+                if (outSize[j] != thisShape[j])
+                    throw new IllegalStateException("Cannot merge CNN data: first DataSet data has shape "
+                        + Arrays.toString(data[0].shape()) + ", " + i + "th example has shape "
+                        + Arrays.toString(thisShape));
+            }*/
+
+            int thisNumExamples = 1;
+            //Put:
+            indexes[1] = interval(0, 0 + data[i].size(0));
+            indexes[0] = interval(examplesSoFar, examplesSoFar + thisNumExamples);
+            out.put(indexes, data[i]);
+
+            examplesSoFar += thisNumExamples;
+        }
+
+        return out;
+    }
+
+
+
     private static INDArray merge4dCnnData(INDArray[] data) {
         if (data.length == 1)
             return data[0];
@@ -371,7 +436,61 @@ public class MyDataSet extends DataSet {
         return out;
     }
 
+
     private static INDArray merge2d(INDArray[] data) {
+        if (data.length == 0)
+            return data[0];
+        int totalRows = 0;
+        for (INDArray arr : data)
+            totalRows += arr.rows();
+        INDArray out = Nd4j.create(totalRows, data[0].columns());
+
+        totalRows = 0;
+        for (INDArray i : data) {
+            if (i.size(0) == 1)
+                out.putRow(totalRows++, i);
+            else {
+                out.put(new INDArrayIndex[] {interval(totalRows, totalRows + i.size(0)), all()}, i);
+                totalRows += i.size(0);
+            }
+        }
+        return out;
+    }
+
+    private static INDArray mergeWithAdd3d(INDArray[] data) {
+        if (data.length == 1)
+            return data[0];
+
+        int[] outSize = new int[3];
+
+        outSize[0] = data.length;
+        for (int i = 0; i < data.length; i++) {
+            outSize[1] = Integer.max(outSize[1], data[i].size(0));
+        }
+        outSize[2] = data[0].size(1);
+
+        INDArray out = Nd4j.create(outSize, 'c');
+
+        int examplesSoFar = 0;
+        INDArrayIndex[] indexes = new INDArrayIndex[3];
+
+        indexes[2] = all();
+
+        for (int i = 0; i < data.length; i++) {
+            int thisNumExamples = 1;
+            //Put:
+            indexes[1] = interval(0, 0 + data[i].size(0));
+            indexes[0] = interval(examplesSoFar, examplesSoFar + thisNumExamples);
+            out.put(indexes, data[i]);
+
+            examplesSoFar += thisNumExamples;
+        }
+
+        return out;
+
+    }
+
+    private static INDArray merge3d(INDArray[] data) {
         if (data.length == 0)
             return data[0];
         int totalRows = 0;
