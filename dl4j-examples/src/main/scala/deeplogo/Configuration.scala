@@ -12,18 +12,18 @@ import org.slf4j.{Logger, LoggerFactory}
   */
 trait Configuration {
 
-  val height = 20
-  val width = 20
+  val height = 80
+  val width = 80
   val channels = 3
-  val numExamples = 360//2240
-  val numLabels = 8//32
-  val batchSize = 20//16
+  val numExamples = 850//2240
+  val numLabels = 8//32a
+  val batchSize = 10//16
   val maxPathPerLabels = 8//160
   val seed = 123
   val rng = new Random(seed)
   val listenerFreq = 10
   val iterations = 1
-  val epochs = 1
+  val epochs = 50
   val splitTrainTest = 0.8
   val nCores = 2
   val save = true

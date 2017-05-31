@@ -120,7 +120,7 @@ public class EditLastLayerOthersFrozen {
         ParentPathLabelGenerator labelMaker = new ParentPathLabelGenerator();
         Random rng = new Random(43);
         int maxPathPerLabel = 100;
-        int epochs = 1;
+        int epochs = 2;
         int ncores = 6;
 
 
