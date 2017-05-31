@@ -20,6 +20,7 @@ package org.deeplearning4j.examples.convolution.sentenceclassification;
 
     import org.deeplearning4j.nn.conf.Updater;
 
+    import org.deeplearning4j.nn.conf.distribution.GaussianDistribution;
     import org.deeplearning4j.nn.conf.inputs.InputType;
 
     import org.deeplearning4j.nn.conf.layers.*;
@@ -170,7 +171,8 @@ public class SimpleCNN  {
             .layer(31, new GlobalPoolingLayer.Builder(PoolingType.AVG).build())
 
             .layer(32, new ActivationLayer.Builder().activation(Activation.SOFTMAX).build())
-
+            .layer(33, new DenseLayer.Builder().name("ffn1").nOut(512).biasInit(0).dropOut(0.5).dist(new GaussianDistribution(0, 0.01)).build)
+            .layer(34, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build)
 
 
             .setInputType(InputType.convolutional(height, width, 3))
