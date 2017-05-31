@@ -75,7 +75,7 @@ public class SimpleCNN  {
             .weightInit(WeightInit.RELU)
 
             .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-            .learningRate(0.001).biasLearningRate(0.00001 * 2)
+            .learningRate(0.0002).biasLearningRate(0.00001 * 2)
             .updater(Updater.ADADELTA)
             .regularization(false)
 
