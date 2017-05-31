@@ -13,10 +13,10 @@ public class MyUpdaterCreator {
     private MyUpdaterCreator() {}
 
     public static org.deeplearning4j.nn.api.Updater getUpdater(Model layer) {
-        if (layer instanceof MyMultiLayerNetwork) {
+        /*if (layer instanceof MyMultiLayerNetwork) {
             return new MyMultiLayerUpdater((MyMultiLayerNetwork) layer);
-        } else {
+        } else {*/
             return new LayerUpdater();
-        }
+    /*    }*/
     }
 }
