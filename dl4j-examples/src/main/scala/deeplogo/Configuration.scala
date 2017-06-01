@@ -12,8 +12,8 @@ import org.slf4j.{Logger, LoggerFactory}
   */
 trait Configuration {
 
-  val height = 80
-  val width = 80
+  val height = 160
+  val width = 160
   val channels = 3
   val numExamples = 850//2240
   val numLabels = 8//32a
