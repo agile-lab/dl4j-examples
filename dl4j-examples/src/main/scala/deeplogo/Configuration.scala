@@ -23,7 +23,7 @@ trait Configuration {
   val rng = new Random(seed)
   val listenerFreq = 10
   val iterations = 1
-  val epochs = 100
+  val epochs = 50
   val splitTrainTest = 0.8
   val nCores = 6
   val save = true
