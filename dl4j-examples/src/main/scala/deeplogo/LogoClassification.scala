@@ -127,7 +127,18 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     }
     System.out.println("Model build complete")
 
+    testIter.reset()
+    var i = 0
+    for(i <- 0 to 10) {
+      val features = testIter.next().getFeatures()
+      val start = System.currentTimeMillis()
 
+      val out = network.output(features)
+
+      val end = System.currentTimeMillis()
+
+      System.out.println("Out Extraction:" + (end - start) + " ms")
+    }
 
     if (conf.save) {
       log.info("Save model....")
