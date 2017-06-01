@@ -30,12 +30,23 @@ import org.nd4j.linalg.activations.Activation;
 
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by paolo on 01/06/2017.
  */
 public class Vgg16 {
 
     public MultiLayerConfiguration conf(int width, int height, int iterations, int numLabels) {
+
+        Map<Integer, Double> lrSchedule = new HashMap<>();
+
+        lrSchedule.put(0, 0.01);
+        lrSchedule.put(1000, 0.005);
+        lrSchedule.put(1500, 0.001);
+        lrSchedule.put(2000, 0.0005);
+        lrSchedule.put(35000, 0.0001);
 
         MultiLayerConfiguration conf =
 
@@ -44,8 +55,9 @@ public class Vgg16 {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 
                 .updater(Updater.NESTEROVS).activation(Activation.RELU)
-                .learningRate(0.0002).biasLearningRate(0.00001 * 2)
-                //.learningRateDecayPolicy(LearningRatePolicy.Inverse)
+                .learningRate(0.01).biasLearningRate(0.001 * 2)
+                .learningRateDecayPolicy(LearningRatePolicy.Schedule)
+                .learningRateSchedule(lrSchedule)
                 .list()
 
                 // block 1
