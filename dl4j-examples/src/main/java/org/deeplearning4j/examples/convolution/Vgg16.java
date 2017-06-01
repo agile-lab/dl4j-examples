@@ -2,6 +2,7 @@ package org.deeplearning4j.examples.convolution;
 
 import org.deeplearning4j.nn.api.Model;
 
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -141,13 +142,13 @@ public class Vgg16 {
 
                     .stride(2, 2).build())
 
-                //                .layer(18, new DenseLayer.Builder().nOut(4096).dropOut(0.5)
+                                .layer(18, new DenseLayer.Builder().nOut(4096).dropOut(0.5)
 
-                //                        .build())
+                                        .build())
 
-                //                .layer(19, new DenseLayer.Builder().nOut(4096).dropOut(0.5)
+                                .layer(19, new DenseLayer.Builder().nOut(4096).dropOut(0.5)
 
-                //                        .build())
+                                       .build())
 
                 .layer(18, new OutputLayer.Builder(
 
