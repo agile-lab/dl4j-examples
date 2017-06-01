@@ -17,16 +17,16 @@ trait Configuration {
   val channels = 3
   val numExamples = 850//2240
   val numLabels = 8//32a
-  val batchSize = 2//16
-  val maxPathPerLabels = 20//160
+  val batchSize = 10//16
+  val maxPathPerLabels = 100//160
   val seed = 123
   val rng = new Random(seed)
   val listenerFreq = 10
   val iterations = 1
-  val epochs = 1
+  val epochs = 100
   val splitTrainTest = 0.8
   val nCores = 6
-  val save = false
+  val save = true
   val modelType = "custom" //LeNet, AlexNet or Custom but you need to fill it out
 
 
