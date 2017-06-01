@@ -1,6 +1,6 @@
 package deeplogo
 
-import net.{CustomNet, SimpleNet}
+import net.{CustomNet, SimpleNet, Vgg16Net}
 
 /**
   * Created by andlatel on 20/05/2017.
@@ -8,7 +8,7 @@ import net.{CustomNet, SimpleNet}
 object Main extends App {
 
   val conf = new ConfigurationImpl()
-  val net = new SimpleNet(conf).createNet()
+  val net = new Vgg16Net(conf).createNet()
 
   new LogoClassification(net, conf).exec()
 
