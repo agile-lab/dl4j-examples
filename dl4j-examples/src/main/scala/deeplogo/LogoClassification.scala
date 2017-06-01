@@ -128,6 +128,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     System.out.println("Model build complete")
 
 
+
     if (conf.save) {
       log.info("Save model....")
       //val basePath = FilenameUtils.concat(System.getProperty("user.dir"), "dl4j-examples/src/main/resources/")

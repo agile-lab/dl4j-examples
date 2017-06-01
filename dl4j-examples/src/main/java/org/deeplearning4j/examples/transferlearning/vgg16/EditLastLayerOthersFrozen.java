@@ -204,6 +204,7 @@ public class EditLastLayerOthersFrozen {
 
         System.out.println("Model saved");
 
+
         for(int i=0; i < 10; i++) {
             INDArray features = testIter2.next().getFeatures();
             long start = System.currentTimeMillis();
@@ -214,6 +215,5 @@ public class EditLastLayerOthersFrozen {
 
             System.out.println("Out Extraction:" + (end - start) + " ms");
         }
-
     }
 }
