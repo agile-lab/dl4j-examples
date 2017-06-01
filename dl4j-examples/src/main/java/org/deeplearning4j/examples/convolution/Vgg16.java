@@ -2,6 +2,7 @@ package org.deeplearning4j.examples.convolution;
 
 import org.deeplearning4j.nn.api.Model;
 
+import org.deeplearning4j.nn.conf.LearningRatePolicy;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 
@@ -43,7 +44,8 @@ public class Vgg16 {
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 
                 .updater(Updater.NESTEROVS).activation(Activation.RELU)
-
+                .learningRate(0.0002).biasLearningRate(0.00001 * 2)
+                //.learningRateDecayPolicy(LearningRatePolicy.Inverse)
                 .list()
 
                 // block 1
