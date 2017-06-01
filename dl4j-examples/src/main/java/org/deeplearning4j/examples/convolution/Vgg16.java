@@ -150,7 +150,7 @@ public class Vgg16 {
 
                                        .build())
 
-                .layer(18, new OutputLayer.Builder(
+                .layer(20, new OutputLayer.Builder(
 
                     LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output")
 
