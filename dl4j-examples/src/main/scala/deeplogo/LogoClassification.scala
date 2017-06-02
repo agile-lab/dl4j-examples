@@ -61,8 +61,8 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     val fileSplit = new FileSplit(mainPath, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
     //val fileSplitTest = new FileSplit(mainPathTest, NativeImageLoader.ALLOWED_FORMATS, conf.rng)
 
-    //val pathFilter = new RandomPathFilter(conf.rng, NativeImageLoader.ALLOWED_FORMATS, 0)
-    val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
+    val pathFilter = new RandomPathFilter(conf.rng, NativeImageLoader.ALLOWED_FORMATS, 0)
+    //val pathFilter = new BalancedPathFilter(conf.rng, labelMaker, conf.numExamples, conf.numLabels, conf.maxPathPerLabels)
 
 
     /**
@@ -116,7 +116,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
     var eval: Evaluation = null
     while (trainMIter.hasNext) {
       network.fit(trainMIter.next)
-      if (iter % 10 == 0) {
+      if (iter % 100 == 0) {
         System.out.println("Evaluate model at iter " + iter + " .... Good Test")
         eval = network.evaluate(testIter)
         System.out.println(eval.stats)

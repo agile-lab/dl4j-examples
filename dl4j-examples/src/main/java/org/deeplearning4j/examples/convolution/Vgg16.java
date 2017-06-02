@@ -26,6 +26,7 @@ import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 
 
+import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.Activation;
 
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -53,11 +54,11 @@ public class Vgg16 {
             new NeuralNetConfiguration.Builder()
 
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-
-                .updater(Updater.NESTEROVS).activation(Activation.RELU)
-                .learningRate(0.005).biasLearningRate(0.001 * 2)
-                .learningRateDecayPolicy(LearningRatePolicy.Schedule)
-                .learningRateSchedule(lrSchedule)
+                .weightInit(WeightInit.RELU)
+                .updater(Updater.NESTEROVS)
+                .activation(Activation.RELU)
+                .learningRate(0.0008).biasLearningRate(0.0008 * 2)
+                .regularization(true).l2(1e-4)
                 .list()
 
                 // block 1
