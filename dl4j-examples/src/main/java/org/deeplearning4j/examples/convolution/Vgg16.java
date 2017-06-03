@@ -57,8 +57,9 @@ public class Vgg16 {
                 .weightInit(WeightInit.RELU)
                 .updater(Updater.NESTEROVS)
                 .activation(Activation.RELU)
-                .learningRate(0.0002).biasLearningRate(0.0002 * 2)
-                .regularization(true).l2(1e-3)
+                .learningRate(0.00008).biasLearningRate(0.00008 * 2)
+                .regularization(true).l2(1e-4)
+                .momentum(0.8)
                 .list()
 
                 // block 1
