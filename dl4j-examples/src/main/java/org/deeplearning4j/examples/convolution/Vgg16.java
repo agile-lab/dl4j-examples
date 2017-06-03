@@ -43,11 +43,11 @@ public class Vgg16 {
 
         Map<Integer, Double> lrSchedule = new HashMap<>();
 
-        lrSchedule.put(0, 0.005);
-        lrSchedule.put(500, 0.002);
-        lrSchedule.put(1500, 0.001);
-        lrSchedule.put(3000, 0.0008);
-        lrSchedule.put(5000, 0.0005);
+        lrSchedule.put(0, 0.002);
+        lrSchedule.put(500, 0.001);
+        lrSchedule.put(1000, 0.0005);
+        lrSchedule.put(1500, 0.0003);
+        lrSchedule.put(2000, 0.0001);
 
         MultiLayerConfiguration conf =
 
@@ -57,9 +57,10 @@ public class Vgg16 {
                 .weightInit(WeightInit.RELU)
                 .updater(Updater.NESTEROVS)
                 .activation(Activation.RELU)
-                .learningRate(0.00008).biasLearningRate(0.00008 * 2)
+                .learningRateDecayPolicy(LearningRatePolicy.Schedule)
+                .learningRateSchedule(lrSchedule)
                 .regularization(true).l2(1e-4)
-                .momentum(0.8)
+                .momentum(0.9)
                 .list()
 
                 // block 1
