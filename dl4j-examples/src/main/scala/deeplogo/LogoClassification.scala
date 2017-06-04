@@ -114,13 +114,16 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
 
     var iter = 0
     var eval: Evaluation = null
-    while (trainMIter.hasNext) {
+    var force = false
+    while (trainMIter.hasNext && !force) {
       network.fit(trainMIter.next)
-      if (iter % 100 == 0) {
+      if (iter % 10 == 0) {
         System.out.println("Evaluate model at iter " + iter + " .... Good Test")
         eval = network.evaluate(testIter)
         System.out.println(eval.stats)
         testIter.reset()
+        if(eval.accuracy() > 80)
+          force=true
 
       }
       iter += 1
