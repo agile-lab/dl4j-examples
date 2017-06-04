@@ -122,7 +122,7 @@ class LogoClassification(val network: MultiLayerNetwork, conf: Configuration) {
         eval = network.evaluate(testIter)
         System.out.println(eval.stats)
         testIter.reset()
-        if(eval.accuracy() > 80)
+        if(eval.accuracy() > 0.8)
           force=true
 
       }
