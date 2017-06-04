@@ -158,11 +158,11 @@ public class Vgg16 {
 //
 //                    .stride(2, 2).build())
 
-                                .layer(10, new DenseLayer.Builder().nOut(4096).dropOut(0.5)
+                                .layer(10, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
 
                                         .build())
 
-                                .layer(11, new DenseLayer.Builder().nOut(4096).dropOut(0.5)
+                                .layer(11, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
 
                                        .build())
 
