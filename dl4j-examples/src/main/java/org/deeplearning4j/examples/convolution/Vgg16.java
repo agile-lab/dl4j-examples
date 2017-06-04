@@ -58,7 +58,7 @@ public class Vgg16 {
                 .updater(Updater.NESTEROVS)
                 .activation(Activation.RELU)
                 .learningRate(0.002)
-                //.regularization(true).l2(1e-4)
+                .regularization(true).l2(1e-4)
                 .momentum(0.9)
                 .list()
 
