@@ -74,9 +74,9 @@ public class Vgg16 {
 
                 .layer(3, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                .layer(4, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
-                .layer(5, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
-                .layer(6, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(4, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(32).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(5, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(32).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(6, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
                 .layer(7, new SubsamplingLayer.Builder().poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2).stride(2, 2).build())
 
@@ -92,9 +92,7 @@ public class Vgg16 {
                 .layer(13, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
                 .layer(14, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                .layer(15, new SubsamplingLayer.Builder().poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2)
-
-                    .stride(2, 2).build())
+                .layer(15, new SubsamplingLayer.Builder().poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2).stride(2, 2).build())
 
                 // block 4
 
@@ -136,21 +134,10 @@ public class Vgg16 {
 //
 //                    .stride(2, 2).build())
 
-                                .layer(16, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
+                .layer(16, new DenseLayer.Builder().nOut(2048).dropOut(0.5).build())
+                .layer(17, new DenseLayer.Builder().nOut(2048).dropOut(0.5).build())
 
-                                        .build())
-
-                                .layer(17, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
-
-                                       .build())
-
-                .layer(18, new OutputLayer.Builder(
-
-                    LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output")
-
-                    .nOut(numLabels).activation(Activation.SOFTMAX) // radial basis function required
-
-                    .build())
+                .layer(18, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build())
 
                 .backprop(true).pretrain(false).setInputType(InputType
 
