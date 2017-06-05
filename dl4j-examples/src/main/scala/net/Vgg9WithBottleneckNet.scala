@@ -13,7 +13,7 @@ class Vgg9WithBottleneckNet(conf: Configuration) extends NetInterface{
   override def createNet(): MultiLayerNetwork = {
     val nonZeroBias: Double = 1
     val dropOut: Double = 0.5
-    val networkConf: MultiLayerConfiguration = new Vgg9withBottleneck()().conf(conf.width, conf.height, conf.iterations, conf.numLabels)
+    val networkConf: MultiLayerConfiguration = new Vgg9withBottleneck().conf(conf.width, conf.height, conf.iterations, conf.numLabels)
     new MultiLayerNetwork(networkConf)
 
     /*** Result:
