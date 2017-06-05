@@ -136,15 +136,15 @@ public class Vgg16 {
 //
 //                    .stride(2, 2).build())
 
-                                .layer(10, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
+                                .layer(16, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
 
                                         .build())
 
-                                .layer(11, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
+                                .layer(17, new DenseLayer.Builder().nOut(2048).dropOut(0.5)
 
                                        .build())
 
-                .layer(12, new OutputLayer.Builder(
+                .layer(18, new OutputLayer.Builder(
 
                     LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output")
 
