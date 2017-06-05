@@ -64,57 +64,35 @@ public class Vgg16 {
 
                 // block 1
 
-                .layer(0, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(
+                .layer(0, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nIn(3).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                    1, 1).nIn(3).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST)
+                .layer(1, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                    .build())
-
-                .layer(1, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1)
-
-                    .padding(1, 1).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST)
-
-                    .build())
-
-                .layer(2, new SubsamplingLayer.Builder()
-
-                    .poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2)
-
-                    .stride(2, 2).build())
+                .layer(2, new SubsamplingLayer.Builder().poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2).stride(2, 2).build())
 
                 // block 2
 
-                .layer(3, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1)
+                .layer(3, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                    .padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(4, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(5, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(6, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                .layer(4, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1)
-
-                    .padding(1, 1).nOut(128).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
-
-                .layer(5, new SubsamplingLayer.Builder()
-
-                    .poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2)
-
-                    .stride(2, 2).build())
+                .layer(7, new SubsamplingLayer.Builder().poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2).stride(2, 2).build())
 
                 // block 3
 
-                .layer(6, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1)
+                .layer(8, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                    .padding(1, 1).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(9, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(10, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(11, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                .layer(7, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1)
+                .layer(12, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(13, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1).padding(1, 1).nOut(64).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
+                .layer(14, new ConvolutionLayer.Builder().kernelSize(1, 1).stride(1, 1).padding(0, 0).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
 
-                    .padding(1, 1).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
-
-                .layer(8, new ConvolutionLayer.Builder().kernelSize(3, 3).stride(1, 1)
-
-                    .padding(1, 1).nOut(256).cudnnAlgoMode(ConvolutionLayer.AlgoMode.PREFER_FASTEST).build())
-
-                .layer(9, new SubsamplingLayer.Builder()
-
-                    .poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2)
+                .layer(15, new SubsamplingLayer.Builder().poolingType(SubsamplingLayer.PoolingType.MAX).kernelSize(2, 2)
 
                     .stride(2, 2).build())
 
